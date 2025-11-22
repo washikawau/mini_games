@@ -13,11 +13,3 @@ export const allSqIds = [
     '10', '11', '12',
     '20', '21', '22',
 ] as const;
-
-export type Board2 = {
-    readonly records: readonly Sq[],
-};
-export type Sq = {
-    readonly sqId: SqId,
-    readonly state: SqState,
-};

@@ -1,5 +1,5 @@
 import { Input } from "@src/app/port/in/IGameEngine";
-import { SceneName, Scenes, SceneSets, TickResult } from "./IScene";
+import { Scene, SceneName, SceneSet, SceneSets, TickResult } from "./IScene";
 
 export class SceneStack {
     constructor(drawerFactories: DrawerFactories) {
@@ -81,5 +81,3 @@ export class SceneStack {
 export type DrawerFactories = {
     [k in SceneName]: () => SceneSets[k]["drawer"];
 };
-type Scene = Scenes[SceneName];
-type SceneSet = SceneSets[SceneName];

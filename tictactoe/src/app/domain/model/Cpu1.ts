@@ -20,6 +20,9 @@ export class Cpu1 {
 
     nextCandidates(curr: Board): SqId[] {
         const currBoard = BoardW.wrap(curr);
+        if (currBoard.possibles.length === 9) {
+            return ['00', '02', '20', '22'];
+        }
         const calculator = Calculator.create(
             this.player,
             this.opponent,

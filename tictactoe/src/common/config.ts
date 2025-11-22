@@ -1,7 +1,7 @@
 
 export const config = {
     screen: {
-        width: 800,
+        width: 450,
         height: 450,
         fps: 60,
         backgroundColor: "grey",

@@ -25,13 +25,13 @@ export class Stage1SceneDrawer implements IStage1SceneDrawer {
     private readonly openeds: CardSp[] = [];
 
     onSceneAdded(
-        highLabelRange: LabelRange,
-        lowLabelRange: LabelRange,
+        firstLabelRange: LabelRange,
+        secondLabelRange: LabelRange,
     ) {
         this.scene.addChild(new BackgroundSp());
         // const toPxScale = this.repo.fetchToPxScale();
-        this.labels.push(new HighLabel(highLabelRange));
-        this.labels.push(new LowLabel(lowLabelRange));
+        this.labels.push(new FirstLabel(firstLabelRange));
+        this.labels.push(new SecondLabel(secondLabelRange));
         for (const label of this.labels) {
             this.scene.addChild(label);
         }
@@ -78,13 +78,13 @@ export class Stage1SceneDrawer implements IStage1SceneDrawer {
 class BackgroundSp extends Sprite {
     constructor() {
         super(config.screen.width, config.screen.height);
-        this.backgroundColor = "green";
+        this.backgroundColor = "black";
     }
 }
 
-class HighLabel extends Label {
+class FirstLabel extends Label {
     constructor(range: LabelRange) {
-        super("ＨＩＧＨ");
+        super("ＦＩＲＳＴ　（○）");
         const size = 30;
         // const strWidth = this.text.length * size;
         this.color = "red";
@@ -97,9 +97,9 @@ class HighLabel extends Label {
     }
 }
 
-class LowLabel extends Label {
+class SecondLabel extends Label {
     constructor(range: LabelRange) {
-        super("ＬＯＷ");
+        super("ＳＥＣＯＮＤ　（☓）");
         const size = 30;
         // const strWidth = this.text.length * size;
         this.color = "blue";

@@ -3,8 +3,8 @@ type Card = {};
 
 export interface IStage1SceneDrawer {
     onSceneAdded(
-        highLabelPos: { x: number, y: number },
-        lowLabelPos: { x: number, y: number },
+        firstLabelPos: { x: number, y: number },
+        secondLabelPos: { x: number, y: number },
     ): void;
     onCardOpened(opened: Card, time: number): void;
     onSelectionStarted(): void;

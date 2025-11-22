@@ -2,8 +2,9 @@ import { Input } from "@src/app/port/in/IGameEngine";
 import { IStage1SceneDrawer } from "@src/app/port/out/IStage1SceneDrawer";
 import { config } from "@src/common/config";
 import { secToFrame } from "@src/common/util";
-// import { CardDeckW } from "../../model/CardDeckW";
-// import { Card, CardDeck, CompareResult } from "../../model/Cards";
+import { Board, Player } from "../../model/Board";
+import { BoardW } from "../../model/BoardW";
+import { Cpu1 } from "../../model/Cpu1";
 import { IScene, TickResult } from "../IScene";
 type CardDeckW = {};
 type Card = {};
@@ -19,15 +20,20 @@ type Props = {
 };
 
 type State =
-    InitState |
+    SelectingFirstOrSecondState |
+    PlayingGameState |
     CardOpeningState |
     SelectingState |
     DrawnState |
     WonState |
     LostState |
     RemovedState;
-type InitState = {
-    tag: "Init",
+type SelectingFirstOrSecondState = {
+    tag: "SelectingFirstOrSecond",
+};
+type PlayingGameState = {
+    tag: "PlayingGame",
+    board: Board,
 };
 type CardOpeningState = {
     tag: "CardOpening",
@@ -43,7 +49,7 @@ type RemovedState = { tag: "Removed", };
 
 const defaultProps: RoProps = {
     frame: 0,
-    status: { tag: "Init" },
+    status: { tag: "SelectingFirstOrSecond" },
 };
 
 export class Stage1Scene implements IScene<typeof name, RoProps, Drawer> {
@@ -62,16 +68,16 @@ export class Stage1Scene implements IScene<typeof name, RoProps, Drawer> {
     }
 
     private _props: RoProps;
-    private readonly highLabelRange = new LabelRange(
-        config.screen.width * 2.0 / 3.0,
+    private readonly firstLabelRange = new LabelRange(
+        config.screen.width / 2.0 - 135,
         config.screen.height * 4 / 9,
-        120,
+        270,
         30,
     );
-    private readonly lowLabelRange = new LabelRange(
-        config.screen.width * 2.0 / 3.0,
+    private readonly secondLabelRange = new LabelRange(
+        config.screen.width / 2.0 - 150,
         config.screen.height * 5 / 9,
-        150,
+        300,
         30,
     );
 
@@ -95,8 +101,8 @@ export class Stage1Scene implements IScene<typeof name, RoProps, Drawer> {
     onAdded(drawer: Drawer): void {
         this._props = defaultProps;
         drawer.onSceneAdded(
-            this.highLabelRange,
-            this.lowLabelRange,
+            this.firstLabelRange,
+            this.secondLabelRange,
         );
     }
 
@@ -115,9 +121,17 @@ export class Stage1Scene implements IScene<typeof name, RoProps, Drawer> {
 
     private doTick(curr: RoProps, input: Input): [Partial<RoProps>, TickResult] {
         switch (curr.status.tag) {
-            case "Init": {
-                const status = this.doTickForInit();
+            case "SelectingFirstOrSecond": {
+                const status = this.doTickForSelectingFirstOrSecond(
+                    curr.status,
+                    input
+                );
                 return [{ status }, {}];
+            }
+            case "PlayingGame": {
+                // const status = this.doTickForPlayingGame();
+                // curr.status;
+                return [{  }, {}];
             }
             case "CardOpening":
                 if (curr.status.remainingFrame > 0) {
@@ -146,31 +160,50 @@ export class Stage1Scene implements IScene<typeof name, RoProps, Drawer> {
         }
     }
 
-    doTickForInit(): CardOpeningState {
-        // const [cardDeckW, opened] = CardDeckW.create().shuffleRemains().openNext();
-        return createCardOpeningState(
-            {},
-            // opened.ok!.v,
-            {
-                tag: "Selecting",
-                // cardDeck: cardDeckW.v,
-                cardDeck: {},
+    doTickForSelectingFirstOrSecond(
+        curr: SelectingFirstOrSecondState,
+        input: Input
+    ): SelectingFirstOrSecondState | PlayingGameState {
+        if (!!input.touchstart) {
+            const pos = input.touchstart.pos;
+            if (this.firstLabelRange.isHit(pos)) {
+                const boardW = BoardW.create();
+                return {
+                    tag: "PlayingGame",
+                    board: boardW.board,
+                };
             }
-        );
+            if (this.secondLabelRange.isHit(pos)) {
+                let boardW = BoardW.create();
+                const candidates = Cpu1.create("o").nextCandidates(boardW.board);
+                const next = candidates[Math.floor(Math.random() * candidates.length)];
+                boardW = boardW.mark(next).ok!;
+                return {
+                    tag: "PlayingGame",
+                    board: boardW.board,
+                };
+            }
+        }
+        return curr;
+    }
+
+    doTickForPlayingGame() {
+
     }
 
     private doTickForSelecting(curr: SelectingState, input: Input): [Partial<RoProps>, TickResult] {
         if (!!input.touchstart) {
             const pos = input.touchstart.pos;
-            const status = this.highLabelRange.isHit(pos) ? this.openNext(curr, 1)
-                : this.lowLabelRange.isHit(pos) ? this.openNext(curr, -1)
+            const status = this.firstLabelRange.isHit(pos) ? this.selectFirstOrSecond(curr, "o")
+                : this.secondLabelRange.isHit(pos) ? this.selectFirstOrSecond(curr, "x")
                     : curr;
             return [{ status }, {}];
         }
         return [{ status: curr }, {}];
     }
 
-    private openNext(curr: SelectingState, expect: CompareResult): CardOpeningState | DrawnState | WonState | LostState {
+    private selectFirstOrSecond(curr: SelectingState, player: Player): CardOpeningState | DrawnState | WonState | LostState {
+        const cpu1 = Cpu1.create(player);
         return createCardOpeningState(
             {},
             // opened.ok!.v,

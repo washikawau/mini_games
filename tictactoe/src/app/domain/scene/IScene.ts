@@ -16,6 +16,8 @@ export type TickResult = {
 };
 
 export type SceneName = keyof Scenes;
+export type Scene = Scenes[SceneName];
+export type SceneSet = SceneSets[SceneName];
 export type SceneSets = {
     [k in SceneName]: {
         scene: Scenes[k],

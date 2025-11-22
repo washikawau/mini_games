@@ -158,7 +158,6 @@ export class TitleScene implements IScene<typeof name, RoProps, Drawer> {
             };
             return [
                 { status: { tag: "Removed" } },
-                // {},
                 { next: Stage1Scene.create(data) }
             ];
         }
